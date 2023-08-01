@@ -1,7 +1,6 @@
 @mainpage
 
-# AV HAL Documentation
-
+# RDK Component AV HAL Documentation
 
 ## Version History
 | Date | Author | Comment | Version |
@@ -13,116 +12,45 @@
 
 ## Table of Contents
 - [Overview](#overview)
-- [Structure](#structure)
 - [Architecture](#architecture)
 - [Video Playback Pseudo Code](#video-playback-pseudo-code)
-- [Data Structures and Defines](#data-structures-and-defines)
 - [References](#references)
 
 
 ## Overview
-This is the API Interface Documentation for AV Subsystem HAL in RDK. This subsystem allows applications to render audio and video (includes drawing video frames, playing audio streams, and managing the playback of audio and video streams), buffer management (includes allocating buffers, managing buffer lifetimes, and transferring buffers between the application and the compositor) and synchronization (includes synchronizing video and audio frames, and synchronizing video and audio streams). The AV Subsystem plays a vital role in ensuring that a smooth playback.
+This is the API Interface Documentation for AV Subsystem HAL in RDK. The sub-components for this subsystem is mentioned further along with the header files that needs to be referred by SoC teams for their implementation. 
 
+This subsystem allows applications to render audio and video (includes drawing video frames, playing audio streams, and managing the playback of audio and video streams), buffer management (includes allocating buffers, managing buffer lifetimes, and transferring buffers between the application and the compositor) and synchronization (includes synchronizing video and audio frames, and synchronizing video and audio streams). The AV Subsystem plays a vital role in ensuring a smooth playback.
 
-## Structure
-```
-rdk-component-hal-westeros
-├── docs/
-│   ├── build/
-│   ├── generate_docs.sh
-│   ├── output/
-│   │   └── html/
-│   │       └── index.html 
-│   └── pages
-│       ├── CONTRIBUTING.md -> ../../CONTRIBUTING.md
-│       ├── images/
-│       ├── LICENSE.md -> ../../LICENSE
-│       ├── NOTICE.md -> ../../NOTICE
-│       ├── README.md
-│       ├── westeros-compositor.md
-│       ├── westeros-renderer.md
-│       └── westeros-sink-soc.md
-├── include/
-│   ├── RDK/
-│   │   ├── westeros-compositor.h
-│   │   ├── westeros-gl.h
-│   │   ├── westeros-render.h
-│   │   └── westeros-sink.h
-│   └── SoC/
-│       └── westeros-sink-soc.h
-├── README.md -> docs/pages/README.md
-├── CONTRIBUTING.md
-├── LICENSE
-├── COPYING -> ./LICENSE
-└── NOTICE
+### Sub-components documentation:
 
-```
+Refer Documentation: https://github.com/rdkcentral/westeros-halif/tree/rdk-dev/docs/pages 
+
+1. <a href="md_pages_2westeros-compositor.html">westeros-compositor</a> : https://github.com/rdkcentral/westeros-halif/blob/rdk-dev/docs/pages/westeros-compositor.md 
+2. <a href="md_pages_2westeros-renderer.html">westeros-renderer</a> : https://github.com/rdkcentral/westeros-halif/blob/rdk-dev/docs/pages/westeros-renderer.md 
+3. <a href="md_pages_2westeros-sink-soc.html">westeros-sink-soc</a> : https://github.com/rdkcentral/westeros-halif/blob/rdk-dev/docs/pages/westeros-sink-soc.md 
+4. <a href="md_pages_2av-sync.html">av-sync</a> : https://github.com/rdkcentral/westeros-halif/blob/rdk-dev/docs/pages/av-sync.md   
+
+### Header Files:
+
+Refer <a href="files.html">Files</a>: https://github.com/rdkcentral/westeros-halif/tree/rdk-dev/include 
+
+RDK:
+1. <a href="westeros-compositor_8h.html">westeros-compositor.h</a> : https://github.com/rdkcentral/westeros-halif/blob/rdk-dev/include/RDK/westeros-compositor.h 
+2. <a href="westeros-render_8h.html">westeros-render.h</a> : https://github.com/rdkcentral/westeros-halif/blob/rdk-dev/include/RDK/westeros-render.h 
+3. <a href="westeros-sink_8h.html">westeros-sink.h</a> : https://github.com/rdkcentral/westeros-halif/blob/rdk-dev/include/RDK/westeros-sink.h 
+4. <a href="westeros-gl_8h.html">westeros-gl.h</a> : https://github.com/rdkcentral/westeros-halif/blob/rdk-dev/include/RDK/westeros-gl.h
+
+SoC:
+1. <a href="westeros-sink-soc_8h.html">westeros-sink-soc.h</a> : https://github.com/rdkcentral/westeros-halif/blob/rdk-dev/include/SoC/westeros-sink-soc.h 
+2. <a href="av-sync_8h.html">avsync.h</a> : https://github.com/rdkcentral/westeros-halif/blob/rdk-dev/include/SoC/avsync.h 
 
 
 ## Architecture
 
-This is the high-level overview of the Audio Video Subsystem. It is written using Mermaid tool (Mermaid Live Editor at mermaid.live) which is a JavaScript based diagramming and charting tool that renders Markdown-inspired text definitions to create and modify diagrams dynamically. This following diagram can be directly renderered on this site: https://mermaid.live/. The following diagram can also be seen on this website: https://wiki.rdkcentral.com/pages/viewpage.action?spaceKey=ASP&title=API+Interface+Documentation+for+AV+Subsystem+in+RDK 
+This is the high-level overview of the Audio Video Subsystem. 
 
-```mermaid
----
-title: High-level Overview of Audio Video Subsystem
----
-flowchart 
-a(Audio Data)
-b(Video Data)
-c(App Src)
-d(Audio Decoder)
-e(ESSOS Resource Manager)
-g(gstreamer-clock-plugin)
-ws(westeros-sink) 
-wss(westeros-sink-soc)
-wvc(westeros-video-client)
-wvs(westeros-video-server)
-wgl(westeros-gl)
-wc(westeros-compositor)
-av(av sync)
-l(libdrm)
-v(v4l2 decoder)
-subgraph Application Layer
-a
-b
-end
-subgraph RDK Layer
-c
-e
-g
-subgraph westeros
-ws
-wss
-wvc
-wvs
-wgl
-wc
-end
-end
-subgraph SoC Layer
-d
-av
-l
-v
-end
-
-a & b-->c
-c--Audio Data-->d
-c--Video Data-->ws
-ws<-->wss
-wvs<-->wvc
-wc<-->ws
-wvs-.-wgl
-wss-.-wvc
-wgl-->l
-wgl-->av
-wss-->v
-g-->av
-e-->d
-e<-->ws
-
-```
+![High-level Overview of Audio Video Subsystem](image/overview.png) 
 
 
 ## Video Playback Pseudo Code
@@ -187,12 +115,8 @@ When gstreamer pipeline state changes from NULL to READY, it should acquire reso
 - State change happens (confirmed by gst_westeros_sink_change_state) happens during playback. We can see av_sync_push_frame & av_sync_pop_frame being called consecutively and successively 
 
 
-## Data Structures and Defines
-Refer the 'Files' sections: <a href="files.html">Files</a>
-
-
 ## References 
-[API Interface Documentation for AV Subsystem in RDK](https://wiki.rdkcentral.com/pages/viewpage.action?spaceKey=ASP&title=API+Interface+Documentation+for+AV+Subsystem+in+RDK) \n
-[Westeros - RDK - RDK Central Wiki](https://wiki.rdkcentral.com/display/RDK/Westeros) \n
-[v4l2-test-formats.cpp](https://git.linuxtv.org/v4l-utils.git/tree/utils/v4l2-compliance/v4l2-test-formats.cpp) \n
-[components/opensource/westeros](https://code.rdkcentral.com/r/admin/repos/components/opensource/westeros,general) \n
+1. [API Interface Documentation for AV Subsystem in RDK](https://wiki.rdkcentral.com/pages/viewpage.action?spaceKey=ASP&title=API+Interface+Documentation+for+AV+Subsystem+in+RDK)
+2. [Westeros - RDK - RDK Central Wiki](https://wiki.rdkcentral.com/display/RDK/Westeros)
+3. [v4l2-test-formats.cpp](https://git.linuxtv.org/v4l-utils.git/tree/utils/v4l2-compliance/v4l2-test-formats.cpp)
+4. [components/opensource/westeros](https://code.rdkcentral.com/r/admin/repos/components/opensource/westeros,general)
