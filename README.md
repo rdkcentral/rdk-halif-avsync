@@ -1,1 +1,1 @@
-docs/pages/README.md
+docs/pages/av-sync.md
