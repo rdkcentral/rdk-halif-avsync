@@ -66,7 +66,9 @@ The AV sync module in Westeros is responsible for ensuring that audio and video 
 
 
 ### References
-[API Interface Documentation for AV Subsystem in RDK](https://wiki.rdkcentral.com/pages/viewpage.action?spaceKey=ASP&title=API+Interface+Documentation+for+AV+Subsystem+in+RDK) \n
+1. [API Interface Documentation for AV Subsystem in RDK](https://wiki.rdkcentral.com/pages/viewpage.action?spaceKey=ASP&title=API+Interface+Documentation+for+AV+Subsystem+in+RDK)
+2. [Westeros - RDK - RDK Central Wiki](https://wiki.rdkcentral.com/display/RDK/Westeros)
+3. [RDK Video Documentation- Westeros](https://developer.rdkcentral.com/documentation/documentation/rdk_video_documentation/rdk-v_components/rdk-v_open-sourced_components/westeros/)
 
 
 ## Component Runtime Execution Requirements
@@ -240,6 +242,6 @@ deactivate westeros-gl
 ```
 
 ### Data Structures and Defines
-Refer the 'Files' sections: <a href="files.html">Files</a>
-- SoC vendors should refer to the header files under the 'soc' directory for API implementation.
-- For RDK level implementation refer to the header files under the 'rdk' directory.
+SoC vendors should refer to the header files under the 'SoC' directory for API implementation.
+Refer the '<a href="files.html">Files</a>' section: https://github.com/rdkcentral/avsync-halif/blob/rdk-dev/include/SoC/avsync.h  
+
