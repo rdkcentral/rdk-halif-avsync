@@ -242,6 +242,6 @@ deactivate westeros-gl
 ```
 
 ### Data Structures and Defines
-SoC vendors should refer to the header files under the 'SoC' directory for API implementation.
-Refer the '<a href="files.html">Files</a>' section: https://github.com/rdkcentral/avsync-halif/blob/rdk-dev/include/avsync.h  
+SoC vendors should refer to the header files under the 'include' directory for API implementation.
+Refer the '<a href="files.html">Files</a>' section: https://github.com/rdkcentral/avsync-halif/blob/rdk-dev/include/
 
