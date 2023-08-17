@@ -1,1 +1,2 @@
-docs/pages/av-sync.md
+# westeros-halif
+Westeros api headers and documentation
