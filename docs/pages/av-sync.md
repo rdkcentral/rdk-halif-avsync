@@ -12,7 +12,6 @@
 
 - [Description](#description)
   - [Introduction](#introduction)
-  - [Repo Details](#repo-details)
   - [Acronyms, Terms and Abbreviations](#acronyms-terms-and-abbreviations)
   - [References](#references)
 - [Component Runtime Execution Requirements](#component-runtime-execution-requirements)
@@ -48,12 +47,6 @@ AV sync module is a software component that enables synchronization between audi
 The AV sync module in Westeros is responsible for ensuring that audio and video components are properly synchronized during playback. When video streams are received by Westeros, they are passed to the AV sync module, which checks for timing differences between the video and audio components. If there is a timing difference, the AV sync module will adjust the playback speed of the audio or video components, add or remove frames, or use buffering and interpolation to smooth out any timing differences and ensure that the audio and video components are properly synchronized. This process helps to prevent any lip sync issues or other synchronization problems that can occur during video playback.
 
 
-### Repo Details
-| Module  | RDK repo | Filepath/Filename  |
-| --- | --- | --- |
-| AV sync | https://code.rdkcentral.com/r/components/opensource/westeros |  file: drm/westeros-gl/avsync/avsync.h |
-
-
 ### Acronyms, Terms and Abbreviations
 
 - `AV Sync`      - Audio Video Synchronization
@@ -72,87 +65,45 @@ The AV sync module in Westeros is responsible for ensuring that audio and video 
 
 
 ## Component Runtime Execution Requirements
-
 These requirements ensure that the HAL executes correctly within the run-time environment that it will be used in.
 
-The requirements for AV sync module includes ensuring that the chipsets have sufficient processing power, low latency, accurate clock synchronization, and support for multiple media formats to enable smooth and reliable audio and video synchronization in real-time media application:
-
 ### Initialization and Startup
-
-The initialization and startup process for AV sync module would typically involves detecting and synchronizing the incoming audio and video streams, managing buffers to prevent data loss, and integrating the AV sync module with the media playback pipeline to ensure smooth playback:
-
-1. Detection of audio and video streams: The AV sync module must detect the incoming audio and video streams and extract timing information from each stream.
-
-2. Calculation of initial synchronization offset: Based on the timing information extracted from the audio and video streams, the AV sync module calculates an initial synchronization offset between the two streams.
-
-3. Adjustment of synchronization offset: Once the initial synchronization offset has been calculated, the AV sync module continuously monitors the audio and video streams and adjusts the synchronization offset as needed to maintain synchronization.
-
-4. Buffer management: The AV sync module uses buffers to manage the incoming audio and video data. SoC vendors need to ensure that their chipsets have sufficient buffer capacity to handle the data flow and prevent buffer underflow or overflow.
-
-5. Integration with media playback pipeline: The AV sync module needs to be integrated with the media playback pipeline to ensure that the synchronized audio and video streams are properly rendered. SoC vendors need to ensure that their chipsets support the necessary APIs and interfaces for this integration.
-
-Caller is supposed to call wstAVSyncInit() before any other calls to hit the av sync module from Westeros.
+TBD
 
 ### Threading Model
-
 This interface is not required to be thread safe. Any caller invoking the APIs should ensure calls are made in a thread safe manner.
-wstAVSyncTerm() function will clean up and terminate the AV sync module used for video playback that was previously initialized by wstAVSyncInit and any repsective threads.
-The threading model can provide real-time performance with minimal latency to prevent synchronization errors. The AV sync module may require multiple threads to handle different tasks such as data input/output, buffer management, and synchronization calculations to enable efficient processing of the audio and video data. The threads used by the AV sync module must be synchronized to ensure that they operate in a coordinated manner and do not interfere with each other and support efficient thread synchronization to prevent synchronization errors or deadlocks.
-Overall, the threading model for AV sync module for SoC vendors involves ensuring real-time performance, multi-threading support, efficient thread synchronization, and power efficiency to enable smooth and reliable audio and video synchronization in real-time media applications.
 
 ### Process Model
-
 The interface is expected to support a single instantiation with a single process.
-The process model for this module can include considerations like ensuring high execution priority to ensure that it operates in real-time and maintains synchronization between audio and video streams to prevent delays and maintain smooth playback, efficient resource allocation to certain hardware resources such as audio and video decoders, clocks, memory to ensure that the AV sync module process has the necessary access to these resources to enable efficient processing of the audio and video data and also robust error handling to enable reliable audio and video synchronization during playback scenarios. Also, the implementation must be able to handle errors such as buffer overflows, synchronization errors, and resource allocation failures. SoC vendors need to ensure that the AV sync module process has robust error handling mechanisms to prevent system crashes and ensure reliable operation.
-
 
 ### Memory Model
-
 The Caller will own any memory that it creates after calling the API's.
-The memory model for AV sync module involves ensuring sufficient memory allocation (to store audio and video data, synchronization information, and other variables used during processing), efficient memory management mechanism (to manage memory usage to prevent buffer overflows and underflows, and ensure that the data is processed in a timely manner) and cache management (requires access to certain memory locations frequently during processing to optimize the AV sync module's access to memory and improve performance) to enable smooth and reliable audio and video synchronization during different playback cases.
 
 ### Power Management Requirements
-
-Although this interface is not required to be involved in any of the power management operations, the state transitions should not affect its operation. e.g. on resumption from a low power state, the interface should operate as if no transition has occurred. The power management requirements for AV sync module for SoC vendors involve ensuring power efficiency (optimize by minimizing CPU and memory usage, reducing unnecessary processing, and maximizing idle time), support for DVFS (Dynamic Frequency and Voltage Scaling to adjust the processing speed and power consumption according to the workload requirements), low power modes (such as sleep or standby to reduce power consumption during idle or low activity periods ) and efficient thermal management (prevent overheating and ensure reliable operation under varying thermal conditions) to ensure reliable operation of the AV sync module.
+Although this interface is not required to be involved in any of the power management operations, the state transitions should not affect its operation. e.g. on resumption from a low power state, the interface should operate as if no transition has occurred. 
 
 ### Asynchronous Notification Model
-
-The Asynchronous Notification Model requirements can involve ensuring support for asynchronous notification, event-driven processing, callback functions, and thread safety mechanisms to enable efficient processing of audio and video data and communication between the AV sync module and other components:
-
-1. Asynchronous notification: The AV sync module can support asynchronous notification to enable efficient processing of audio and video data. SoC vendors need to ensure that their chipsets support the asynchronous notification model to enable efficient communication between the AV sync module and other components.
-
-2. Event-driven processing: The AV sync module should be designed with an event-driven processing model to enable efficient handling of events such as new audio or video data arriving. SoC vendors need to ensure that their chipsets support the event-driven processing model to enable efficient processing of audio and video data.
-
-3. Callback functions: The AV sync module may require the use of callback functions to enable efficient handling of events. SoC vendors need to ensure that their chipsets support the use of callback functions to enable efficient communication between the AV sync module and other components.
-
-4. Thread safety: The AV sync module should be designed to ensure thread safety when using the asynchronous notification model. SoC vendors need to ensure that their chipsets support thread safety mechanisms such as mutexes and semaphores to prevent synchronization errors and deadlocks.
+TBD
 
 ### Blocking calls
-
-The blocking calls requirements may involve ensuring support for blocking calls, thread safety mechanisms, managing performance implications, and exploring alternative communication mechanisms to optimize the performance of the AV sync module. The use of blocking calls may not always be the most efficient or appropriate mechanism for communication between the AV sync module and other components. Other alternative mechanisms such as non-blocking calls or event-driven processing to optimize the performance of the AV sync module can be explored.
+TBD
 
 ### Internal Error Handling
-
 All the APIs must return error synchronously as a return argument. HAL is responsible for handling system errors (e.g. out of memory) internally.
-The AV sync module should be designed to detect errors or exceptions that occur during processing for precise error handling. Error handling mechanisms such as error logging, error reporting, or error recovery can be implemented for debugging and troubleshooting purposes. Also, this module should be designed to ensure robustness in the face of errors or unexpected conditions. 
 
 ### Persistence Model
-
-There is no requirement for the interface to persist any setting information however, this module may require storage to persist data such as synchronization information, buffer contents or any configuration. Enough storage capacity and efficient storage mechanisms to support the AV sync module's persistence requirements can be ensured. Also data integrity mechanisms such as error correction codes and checksums to prevent data loss or corruption should be considered as well for smooth playback operations.
+There is no requirement for the interface to persist any setting information.
 
 
 ## Non-functional requirements
 
 ### Logging and debugging requirements
-
-This interface is required to support TRACE, DEBUG, INFO, WARN and ERROR messages. DEBUG should be disabled by default and enabled when required. ERROR and WARN level logs should be enabled. The module should support logging of relevant events and errors to enable troubleshooting and sufficient debugging and performance monitoring information can be provided such as stack traces, error messages, and variable values. SoC vendors need to ensure that the AV sync module supports logging to a system log or a dedicated log file.
+This interface is required to support TRACE, DEBUG, INFO, WARN and ERROR messages. DEBUG should be disabled by default and enabled when required. ERROR and WARN level logs should be enabled. 
 
 ### Memory and performance requirements
-
-This interface is required to not cause excessive memory and CPU utilization. The requirements for AV sync module should provide optimal memory capacity and bandwidth, efficient processing power, caching mechanisms, and power efficiency to enable smooth and reliable audio and video synchronization in real-time media applications. The AV sync module may require memory to store audio and video data, synchronization information and other variables used during processing and maintain synchronization in real-time. SoC vendors need to ensure that their chipsets have sufficient memory capacity to support the AV sync module's memory and perfomance requirements.
+This interface is required to not cause excessive memory and CPU utilization. 
 
 ### Quality Control
-
 - This interface is required to perform static analysis, our preferred tool is Coverity.
 - Open-source copyright validation is required to be performed, e.g.: Black duck, FossID.
 - Have a zero-warning policy with regards to compiling. All warnings are required to be treated as errors.
@@ -160,26 +111,21 @@ This interface is required to not cause excessive memory and CPU utilization. Th
 - Tests will endeavour to create worst case scenarios to assist investigations.
 
 ### Licensing
-
 The `HAL` implementation is expected to released under the Apache License 2.0.
 
 ### Build Requirements
-
 The build requirements for AV sync module for SoC vendors involves ensuring:
 1. compatibility with the build process/configurations used by the RDK and native Premium apps
 2. inclusion of all necessary dependencies on other software components and libraries 
 3. support for testing mechanisms during the build process to ensure that the AV sync module is functioning properly. 
 
 ### Variability Management
-
 Any changes in the `Public APIs` should be reviewed and approved by the component architects. The AV sync module may require version management to enable maintenance and updates. 
 
 ### Platform or Product Customization
-
 The platform or product customization requirements for AV sync module for SoC vendors includes ensuring support for native premium apps integration, customization options, platform-specific/product-specific features, along with the provision of sufficient documentation to enable adequate customization and implementation of the AV sync module.
 
 ## Interface API Documentation
-
 `API` documentation will be provided by Doxygen which will be generated from the header files.
 
 ### Theory of operation and key concepts
@@ -242,6 +188,4 @@ deactivate westeros-gl
 ```
 
 ### Data Structures and Defines
-SoC vendors should refer to the header files under the 'include' directory for API implementation.
-Refer the '<a href="files.html">Files</a>' section: https://github.com/rdkcentral/avsync-halif/blob/rdk-dev/include/
-
+SoC vendors should refer to the header files under the 'include' directory for API implementation: https://github.com/rdkcentral/avsync-halif/blob/rdk-dev/include/
