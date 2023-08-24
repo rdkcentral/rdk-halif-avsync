@@ -2,11 +2,11 @@
 
 ## Version History
 
-| Date | Author | Comment | Version |
-| --- | --------- | --- | --- |
-| 29/07/23 | Premium App Team | First Release | 1.1.1 |
-| 23/05/23 | Review Team | First Edit | 0.1.1 |
-| 08/05/23 | Premium App Team | Pre-Release | 0.1.0 |
+| Date [DD/MM/YY] | Comment | Version |
+| --- | --- | --- |
+| /08/23 | Initial review fixes	| 1.0.1 |
+| 29/07/23 | First Release | 1.0.0 |
+
 
 ## Table of Contents
 
@@ -40,12 +40,10 @@
 
 
 ## Description
+This interface provides details on AV Sync API's for SoC implementation.
 
 ### Introduction
-
 AV sync module is a software component that enables synchronization between audio and video signals in real-time media applications. This module is particularly important in media playback scenarios where the audio and video streams faces synchronization issues.
-The AV sync module in Westeros is responsible for ensuring that audio and video components are properly synchronized during playback. When video streams are received by Westeros, they are passed to the AV sync module, which checks for timing differences between the video and audio components. If there is a timing difference, the AV sync module will adjust the playback speed of the audio or video components, add or remove frames, or use buffering and interpolation to smooth out any timing differences and ensure that the audio and video components are properly synchronized. This process helps to prevent any lip sync issues or other synchronization problems that can occur during video playback.
-
 
 ### Acronyms, Terms and Abbreviations
 
@@ -59,16 +57,16 @@ The AV sync module in Westeros is responsible for ensuring that audio and video 
 
 
 ### References
-1. [API Interface Documentation for AV Subsystem in RDK](https://wiki.rdkcentral.com/pages/viewpage.action?spaceKey=ASP&title=API+Interface+Documentation+for+AV+Subsystem+in+RDK)
-2. [Westeros - RDK - RDK Central Wiki](https://wiki.rdkcentral.com/display/RDK/Westeros)
-3. [RDK Video Documentation- Westeros](https://developer.rdkcentral.com/documentation/documentation/rdk_video_documentation/rdk-v_components/rdk-v_open-sourced_components/westeros/)
+1. [Westeros - RDK - RDK Central Wiki](https://wiki.rdkcentral.com/display/RDK/Westeros)
+2. [RDK Video Documentation- Westeros](https://developer.rdkcentral.com/documentation/documentation/rdk_video_documentation/rdk-v_components/rdk-v_open-sourced_components/westeros/)
 
 
 ## Component Runtime Execution Requirements
 These requirements ensure that the HAL executes correctly within the run-time environment that it will be used in.
+Failure to meet these requirements will likely result in undefined and unexpected behaviour.
 
 ### Initialization and Startup
-TBD
+`Caller` should initialize by calling avsync_soc_init() before calling any other `API`.
 
 ### Threading Model
 This interface is not required to be thread safe. Any caller invoking the APIs should ensure calls are made in a thread safe manner.
@@ -83,10 +81,10 @@ The Caller will own any memory that it creates after calling the API's.
 Although this interface is not required to be involved in any of the power management operations, the state transitions should not affect its operation. e.g. on resumption from a low power state, the interface should operate as if no transition has occurred. 
 
 ### Asynchronous Notification Model
-TBD
+avsync_soc_free_frame_callback() will function is responsible for assigning a callback function to an AVSync object's freeCB member. By doing so, it allows the AVSync object to store the provided callback function, which can later be invoked to free a frame or perform other necessary cleanup operations.
 
 ### Blocking calls
-TBD
+None
 
 ### Internal Error Handling
 All the APIs must return error synchronously as a return argument. HAL is responsible for handling system errors (e.g. out of memory) internally.
