@@ -13,7 +13,6 @@
 - [Description](#description)
   - [Introduction](#introduction)
   - [Acronyms, Terms and Abbreviations](#acronyms-terms-and-abbreviations)
-  - [References](#references)
 - [Component Runtime Execution Requirements](#component-runtime-execution-requirements)
   - [Initialization and Startup](#initializatio-and-startup)
   - [Threading Model](#threading-model)
@@ -40,54 +39,60 @@
 
 
 ## Description
-This interface provides details on AV Sync API's for SoC implementation.
+This interface is to abstract the `RDK`-V `AV Sync` `HAL` requirements at a general level to allow platform independent control. `AV Sync` `HAL` provides details on a set of `API`'s for `SoC` implementation. The picture below shows the interactions between `Caller`, `AV Sync` `HAL` and `SoC` `AV Sync`.
+
+```mermaid
+
+flowchart TD
+A[Caller] <--> B[AV Sync HAL] <--> C[SoC AV Sync]
+
+style A fill:#99CCFF,stroke:#333
+style B fill:#ffa,stroke:#333
+style C fill:#fcc,stroke:#333
+```
 
 ### Introduction
-AV sync module is a software component that enables synchronization between audio and video signals in real-time media applications. This module is particularly important in media playback scenarios where the audio and video streams faces synchronization issues.
+`AV Sync` module is a software component that enables synchronization between audio and video signals in real-time media applications. This module is particularly important in media playback scenarios where the audio and video streams faces synchronization issues.
 
 ### Acronyms, Terms and Abbreviations
 
 - `AV Sync`      - Audio Video Synchronization
 - `HAL`          - Hardware Abstraction Layer
 - `API`          - Application Programming Interface
+- `RDK`          - Reference Design Kit for All Devices
 - `Caller`       - Any user of the interface via the APIs
-- `wst`          - Westeros
-- `Westeros-gl`  - Westeros Graphics Library
-- `EGL`          - Embedded Graphics Library
-
-
-### References
-1. [Westeros - RDK - RDK Central Wiki](https://wiki.rdkcentral.com/display/RDK/Westeros)
-2. [RDK Video Documentation- Westeros](https://developer.rdkcentral.com/documentation/documentation/rdk_video_documentation/rdk-v_components/rdk-v_open-sourced_components/westeros/)
+- `SoC`          - System on Chip
+- `Westeros-GL`  - Westeros Graphics Library
 
 
 ## Component Runtime Execution Requirements
-These requirements ensure that the HAL executes correctly within the run-time environment that it will be used in.
-Failure to meet these requirements will likely result in undefined and unexpected behaviour.
+These requirements ensure that the `HAL` executes correctly within the run-time environment that it will be used in.Failure to meet these requirements will likely result in undefined and unexpected behaviour.
 
 ### Initialization and Startup
-`Caller` should initialize by calling avsync_soc_init() before calling any other `API`.
+`Caller` should initialize the `AV Sync` session by calling `avsync_soc_init`() before calling any other `API`.
 
 ### Threading Model
-This interface is not required to be thread safe. Any caller invoking the APIs should ensure calls are made in a thread safe manner.
+This interface is not required to be thread safe. Any `Caller` while invoking these HAL `API`'s should ensure calls are made in a thread safe manner.
 
 ### Process Model
 The interface is expected to support a single instantiation with a single process.
 
 ### Memory Model
-The Caller will own any memory that it creates after calling the API's.
+The `AV Sync` `HAL` will own any memory that it creates. The `Caller` will own any memory that it creates.
+
+The `avsync_soc_push_frame`() is responsible to allocate memory for video frames but it should also free this memory if in case sync push frame operation fails.
 
 ### Power Management Requirements
-Although this interface is not required to be involved in any of the power management operations, the state transitions should not affect its operation. e.g. on resumption from a low power state, the interface should operate as if no transition has occurred. 
+This interface is not required to be involved in power management.
 
 ### Asynchronous Notification Model
-avsync_soc_free_frame_callback() will function is responsible for assigning a callback function to an AVSync object's freeCB member. By doing so, it allows the AVSync object to store the provided callback function, which can later be invoked to free a frame or perform other necessary cleanup operations.
+`avsync_soc_free_frame_callback()` function sets the callback function for freeing any allocated video frames. 
 
 ### Blocking calls
-None
+This interface is required to have no blocking calls.
 
 ### Internal Error Handling
-All the APIs must return error synchronously as a return argument. HAL is responsible for handling system errors (e.g. out of memory) internally.
+All the `API`'s must return error synchronously as a return argument. `HAL` is responsible for handling system errors (e.g. out of memory) internally.
 
 ### Persistence Model
 There is no requirement for the interface to persist any setting information.
@@ -96,56 +101,56 @@ There is no requirement for the interface to persist any setting information.
 ## Non-functional requirements
 
 ### Logging and debugging requirements
-This interface is required to support TRACE, DEBUG, INFO, WARN and ERROR messages. DEBUG should be disabled by default and enabled when required. ERROR and WARN level logs should be enabled. 
+This interface is required to support DEBUG, INFO and ERROR messages. ERROR logs should be enabled by default. DEBUG and INFO is required to be disabled by default and enabled when needed.
 
 ### Memory and performance requirements
 This interface is required to not cause excessive memory and CPU utilization. 
 
 ### Quality Control
 - This interface is required to perform static analysis, our preferred tool is Coverity.
-- Open-source copyright validation is required to be performed, e.g.: Black duck, FossID.
-- Have a zero-warning policy with regards to compiling. All warnings are required to be treated as errors.
+- Have a zero-warning policy with regards to compiling. All warnings are required to be treated as error.
+- Copyright validation is required to be performed, e.g.: Black duck, FossID.
 - Use of memory analysis tools like Valgrind are encouraged, to identify leaks/corruptions.
-- Tests will endeavour to create worst case scenarios to assist investigations.
+- `HAL` Tests will endeavour to create worst case scenarios to assist investigations.
+- Improvements by any party to the testing suite are required to be fed back.
 
 ### Licensing
 The `HAL` implementation is expected to released under the Apache License 2.0.
 
 ### Build Requirements
-The build requirements for AV sync module for SoC vendors involves ensuring:
-1. compatibility with the build process/configurations used by the RDK and native Premium apps
-2. inclusion of all necessary dependencies on other software components and libraries 
-3. support for testing mechanisms during the build process to ensure that the AV sync module is functioning properly. 
+The source code must build into a shared library and must be named as libXavsync.so where X denotes the `SoC` `AV Sync` module. The build mechanism must be independent of Yocto. 
 
 ### Variability Management
-Any changes in the `Public APIs` should be reviewed and approved by the component architects. The AV sync module may require version management to enable maintenance and updates. 
+Any change to the interface must be reviewed and approved by component architects and owners.
 
 ### Platform or Product Customization
-The platform or product customization requirements for AV sync module for SoC vendors includes ensuring support for native premium apps integration, customization options, platform-specific/product-specific features, along with the provision of sufficient documentation to enable adequate customization and implementation of the AV sync module.
+The requirements for `AV Sync` module for `SoC` vendors includes ensuring support for native premium apps integration, customization options, platform-specific/product-specific features, along with the provision of sufficient documentation to enable adequate customization and implementation of the `AV Sync` module.
 
 ## Interface API Documentation
 `API` documentation will be provided by Doxygen which will be generated from the header files.
 
 ### Theory of operation and key concepts
+The `Caller` is expected to have complete control over the life cycle of the `HAL`.
 
-The Westeros module and the AVSync module work together to provide audio and video synchronization for video playback on Linux systems. The Westeros module is responsible for video playback and rendering using the Wayland protocol. It uses the Westeros-GL module to perform graphics rendering and the AVSync module to synchronize the audio and video components of a multimedia stream. The AVSync module provides audio and video synchronization by performing timing calculations and adjusting the playback rate of the audio stream to match the video stream. 
+- The Westeros module and the `AV Sync` module work together to provide audio and video synchronization for video playback on Linux systems. The Westeros module is responsible for video playback and rendering using the Wayland protocol. It uses the `Westeros-GL` module to perform graphics rendering and the AVSync module to synchronize the audio and video components of a multimedia stream. 
 
-The Westeros-gl module initializes with the WstGLInit() call which further goes on to start the video server connection through internal calls. These internal calls will lead to the Westeros AV sync calls under different playback conditions. The Westeros AV sync calls are responsible for calling the SoC specific AV Sync Module and their respective API's which needs to provide low-level synchronization operations by making ioctl calls for handling synchronization-related operations by making use of a device file to communicate with the hardware and perform them.
-These Westeros AV Sync calls are:
+- After the `Westeros-GL` module is initialized, a video server connection is setup through the internal calls. These internal calls will further lead to the start of `AV Sync` module. The Westeros `AV sync` calls will be calling the `HAL` `API`'s, which would be responsible to call the respective `SoC` specific `AV Sync` API's, that would further handle the low-level synchronization related operations using ioctl calls.
 
-1. wstAVSyncInit: This API is only called if the WESTEROS_GL_AVSYNC macro is defined. The purpose of the wstAVSyncInit function is to initialize the audio and video synchronization. The function should be called when the syncType is not SYNC_IMMEDIATE and the VideoFrameManager syncInit flag is not set. These conditions ensure that the synchronization is only initialized when necessary, and not on every frame. If both conditions are true, then the wstAVSyncInit function is called with two arguments: vfm and vfm->conn->sessionId. The vfm argument is a pointer to the VideoFrameManager object, and the vfm->conn->sessionId argument is an identifier for the current session. The calling funtion for wstAVSyncInit checks if the conn->videoPlane->vfm object exists. The vfm object is a VideoFrameManager object that is responsible for managing the video frames. If vfm exists, then the code checks if the syncInit flag is false and if the syncType is not SYNC_IMMEDIATE.
+- The `HAL` `AV Sync` `API`'s are: 
 
-2. wstAVSyncTerm: This API is only called if the WESTEROS_GL_AVSYNC macro is defined. The function should be called when the synchronization process is no longer needed or when the application is shutting down. 
+`avsync_soc_init`(), `avsync_soc_term`(), `avsync_soc_set_mode`(), `avsync_soc_free_frame_callback`(), `avsync_soc_push_frame`(), `avsync_soc_pop_frame`(), `avsync_soc_set_rate`(), `avsync_soc_pause`(), `avsync_soc_set_interval`(), `avsync_soc_eos`().
 
-3. wstAVSyncSetSyncType: This API is only called if the WESTEROS_GL_AVSYNC macro is defined and the vfm->sync member is not NULL. The function should be called when the synchronization mode needs to be changed.
+- Initialize the `HAL` using function `avsync_soc_init`() before making any other `API`s calls. If this call fails, the `HAL` must return the respective error. This call initializes the `AV Sync` session and should provide required session related data such as refresh rate, seesion id, sync type, and other optional data like start threshold, vsync interval etc.
 
-4. wstAVSyncPush: This API is called based on the preprocessor directive #ifdef WESTEROS_GL_AVSYNC and the audio-video synchronization resources are available, the function checks if syncInit member is false and the syncType member is not SYNC_IMMEDIATE. If both conditions are true, the function initializes audio-video synchronization resources using the wstAVSyncInit function. After initialization, the function calls the wstAVSyncPush function with the vfm object and the f parameter, which is a pointer to the VideoFrame structure containing the video frame data.
+- The `avsync_soc_free_frame_callback`() function sets the callback function for freeing any allocated video frames. 
 
-5. wstAVSyncPop: This API is called based on the preprocessor directive #ifdef WESTEROS_GL_AVSYNC and if vfm is not expired, then it checks if video playback is not paused. If playback is paused, there is no need to call wstAVSyncPop as there will be no new frames to display.
+- The push and pop operations on the video frames to `AV Sync` module will be done using `avsync_soc_push_frame`() and `avsync_soc_pop_frame` respectively.
 
-6. wstAVSyncPause: This API is only called if the WESTEROS_GL_AVSYNC macro is defined and checks if viideo playback is currently paused (vfm->paused is true), and the pause argument is false (i.e. playback is being resumed), and the vfm->resetBaseTime variable is also true, then the function resets the vfm->flipTimeBase variable to 0 and sets resetBaseTime to false. The flipTimeBase variable is used to keep track of the time that the last video frame was displayed, and the resetBaseTime variable is used to indicate whether or not this variable needs to be reset. This ensures that when playback is resumed, the next video frame will be displayed at the correct time.
+- The sync mode, playback rate and vsync interval can be set using `avsync_soc_set_mode`(), `avsync_soc_set_rate`() and `avsync_soc_set_interval`() respectively.
 
-7. wstAVSyncEos: This API is only called if the WESTEROS_GL_AVSYNC macro is defined and if vmf->sync is true.
+- The `avsync_soc_pause`() and `avsync_soc_eos`() should handle the playback conditions 'pause' and 'end-of-stream' respectively.
+
+- The `AV Sync` session will be terminated using `avsync_soc_term`() `API`.
 
 ### Diagrams
 
@@ -154,36 +159,72 @@ These Westeros AV Sync calls are:
 ```mermaid
 
 sequenceDiagram
-participant PremiumApp
-box lightyellow Westeros
-participant westeros-gl
-participant AV-Sync
+participant Caller
+participant AV Sync HAL
+participant SoC AV Sync 
+
+Caller-->>Caller:Westeros GL is initialised
+note left of Caller:Playback started
+Caller->>+AV Sync HAL:avsync_soc_init()
+note over AV Sync HAL,SoC AV Sync:invoke open/create session calls
+AV Sync HAL-->>SoC AV Sync:session opened
+activate SoC AV Sync 
+SoC AV Sync-->>AV Sync HAL:return session related data
+AV Sync HAL-->>-Caller:returns pointer to the AVSync structure
+rect rgb(191, 225, 255)
+alt Set the callback to free allocated video 
+Caller-)AV Sync HAL:avsync_soc_free_frame_callback()
 end
-autonumber
-PremiumApp-->>westeros-gl:Playback Started
-note over westeros-gl:eglGetDisplay connection
-activate westeros-gl
-westeros-gl->>westeros-gl:Westeros GL is initialised
-westeros-gl->>AV-Sync:wstAVSyncInit
-Note right of AV-Sync:invoke open/create session calls <br/>to Soc AV Sync module
-westeros-gl->>AV-Sync:wstAVSyncSetSyncType
-Note right of AV-Sync:invoke set "sync type" call <br/>to Soc AV Sync module
-westeros-gl->>AV-Sync:wstAVSyncPush
-Note right of AV-Sync:invoke push frame call <br/>to Soc AV Sync module
-westeros-gl->>AV-Sync:wstAVSyncPop
-Note right of AV-Sync:invoke pop frame call <br/>to Soc AV Sync module               
-PremiumApp-->>westeros-gl:Playback paused
-westeros-gl->>AV-Sync:wstAVSyncPause
-Note right of AV-Sync:invoke pause video call <br/>to Soc AV Sync module
-PremiumApp-->>westeros-gl:Playback EOS
-westeros-gl->>AV-Sync:wstAVSyncEos
-Note right of AV-Sync:invoke eos call <br/>to Soc AV Sync module
-PremiumApp-->>westeros-gl:Playback exited
-westeros-gl->>AV-Sync:wstAVSyncTerm
-Note right of AV-Sync:invoke close/destroy session calls <br/>to Soc AV Sync module
-deactivate westeros-gl
+end
+Caller->>+AV Sync HAL:avsync_soc_set_mode()
+note over AV Sync HAL,SoC AV Sync:set sync mode
+AV Sync HAL->>-Caller: return 0 if the mode was successfully changed, or -1 if an error occurred.
+
+loop
+rect rgb(255,250,225)
+Caller->>+AV Sync HAL:avsync_soc_push_frame()
+note over AV Sync HAL,SoC AV Sync:invoke push frame call
+AV Sync HAL->>-Caller:return true
+rect rgb(191, 225, 255)
+alt if vblank interval changes
+Caller->>+AV Sync HAL:avsync_soc_set_interval()
+note over AV Sync HAL,SoC AV Sync:update vsync interval
+AV Sync HAL-->>-Caller:return 0
+end
+end
+Caller->>+AV Sync HAL:avsync_soc_pop_frame()
+note over AV Sync HAL,SoC AV Sync:invoke pop frame call
+AV Sync HAL->>-Caller:return f (pointer to the retrieved video frame)
+end
+end
+
+rect rgb(215, 255, 255)
+alt
+note left of Caller:Playback paused
+rect rgb(193, 225, 255)
+alt  if !pause variable and rate variable != 1.0
+Caller->>+AV Sync HAL:avsync_soc_set_rate()
+note over AV Sync HAL,SoC AV Sync:set playback rate/speed
+AV Sync HAL-->>-Caller:return 0
+end
+end
+Caller->>+AV Sync HAL:avsync_soc_pause()
+note over AV Sync HAL,SoC AV Sync:invoke pause call
+AV Sync HAL-->>-Caller:return 0
+end
+end
+
+note left of Caller:Playback EOS
+Caller->>+AV Sync HAL:avsync_soc_eos()
+note over AV Sync HAL,SoC AV Sync:invoke eos call
+AV Sync HAL-->>-Caller:return 0
+Caller->>+AV Sync HAL:avsync_soc_term()
+note over AV Sync HAL,SoC AV Sync:invoke close/destroy session calls
+AV Sync HAL--xSoC AV Sync:session closed
+deactivate SoC AV Sync 
+deactivate AV Sync HAL
 
 ```
 
 ### Data Structures and Defines
-SoC vendors should refer to the header files under the 'include' directory for API implementation: https://github.com/rdkcentral/avsync-halif/blob/rdk-dev/include/
+`SoC` vendors should refer to the header files under the 'include' directory for `API` implementation: https://github.com/rdkcentral/avsync-halif/blob/rdk-dev/include/
