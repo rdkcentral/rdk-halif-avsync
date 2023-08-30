@@ -4,7 +4,6 @@
 
 | Date [DD/MM/YY] | Comment | Version |
 | --- | --- | --- |
-| /08/23 | Initial review fixes	| 1.0.1 |
 | 29/07/23 | First Release | 1.0.0 |
 
 
@@ -39,7 +38,7 @@
 
 
 ## Description
-This interface is to abstract the `RDK`-V `AV Sync` `HAL` requirements at a general level to allow platform independent control. `AV Sync` `HAL` provides details on a set of `API`'s for `SoC` implementation. The picture below shows the interactions between `Caller`, `AV Sync` `HAL` and `SoC` `AV Sync`.
+This interface is to abstract the `AV Sync` `HAL` requirements at a general level to allow platform independent control. `AV Sync` `HAL` provides details on a set of `API`'s for `SoC` implementation. The picture below shows the interactions between `Caller`, `AV Sync` `HAL` and `SoC` `AV Sync`.
 
 ```mermaid
 
@@ -59,14 +58,13 @@ style C fill:#fcc,stroke:#333
 - `AV Sync`      - Audio Video Synchronization
 - `HAL`          - Hardware Abstraction Layer
 - `API`          - Application Programming Interface
-- `RDK`          - Reference Design Kit for All Devices
 - `Caller`       - Any user of the interface via the APIs
 - `SoC`          - System on Chip
 - `Westeros-GL`  - Westeros Graphics Library
 
 
 ## Component Runtime Execution Requirements
-These requirements ensure that the `HAL` executes correctly within the run-time environment that it will be used in.Failure to meet these requirements will likely result in undefined and unexpected behaviour.
+These requirements ensure that the `HAL` executes correctly within the run-time environment that it will be used in. Failure to meet these requirements will likely result in undefined and unexpected behaviour.
 
 ### Initialization and Startup
 `Caller` should initialize the `AV Sync` session by calling `avsync_soc_init`() before calling any other `API`.
@@ -80,7 +78,7 @@ The interface is expected to support a single instantiation with a single proces
 ### Memory Model
 The `AV Sync` `HAL` will own any memory that it creates. The `Caller` will own any memory that it creates.
 
-The `avsync_soc_push_frame`() is responsible to allocate memory for video frames but it should also free this memory if in case sync push frame operation fails.
+The `avsync_soc_push_frame`() is responsible to allocate memory for video frames metadata but it should also free this memory if in case sync push frame operation fails.
 
 ### Power Management Requirements
 This interface is not required to be involved in power management.
@@ -118,7 +116,7 @@ This interface is required to not cause excessive memory and CPU utilization.
 The `HAL` implementation is expected to released under the Apache License 2.0.
 
 ### Build Requirements
-The source code must build into a shared library and must be named as libXavsync.so where X denotes the `SoC` `AV Sync` module. The build mechanism must be independent of Yocto. 
+The source code must build into a shared library and must be named as libXavsync.so where X denotes the `SoC` `AV Sync` module. The build mechanism should be independent of Yocto. 
 
 ### Variability Management
 Any change to the interface must be reviewed and approved by component architects and owners.
@@ -159,32 +157,35 @@ The `Caller` is expected to have complete control over the life cycle of the `HA
 ```mermaid
 
 sequenceDiagram
+
 participant Caller
 participant AV Sync HAL
 participant SoC AV Sync 
 
 Caller-->>Caller:Westeros GL is initialised
 note left of Caller:Playback started
+
 Caller->>+AV Sync HAL:avsync_soc_init()
 note over AV Sync HAL,SoC AV Sync:invoke open/create session calls
 AV Sync HAL-->>SoC AV Sync:session opened
 activate SoC AV Sync 
 SoC AV Sync-->>AV Sync HAL:return session related data
 AV Sync HAL-->>-Caller:returns pointer to the AVSync structure
+
 rect rgb(191, 225, 255)
 alt Set the callback to free allocated video 
 Caller-)AV Sync HAL:avsync_soc_free_frame_callback()
 end
 end
+
 Caller->>+AV Sync HAL:avsync_soc_set_mode()
 note over AV Sync HAL,SoC AV Sync:set sync mode
 AV Sync HAL->>-Caller: return 0 if the mode was successfully changed, or -1 if an error occurred.
 
-loop
-rect rgb(255,250,225)
 Caller->>+AV Sync HAL:avsync_soc_push_frame()
 note over AV Sync HAL,SoC AV Sync:invoke push frame call
 AV Sync HAL->>-Caller:return true
+
 rect rgb(191, 225, 255)
 alt if vblank interval changes
 Caller->>+AV Sync HAL:avsync_soc_set_interval()
@@ -192,13 +193,12 @@ note over AV Sync HAL,SoC AV Sync:update vsync interval
 AV Sync HAL-->>-Caller:return 0
 end
 end
+
 Caller->>+AV Sync HAL:avsync_soc_pop_frame()
 note over AV Sync HAL,SoC AV Sync:invoke pop frame call
 AV Sync HAL->>-Caller:return f (pointer to the retrieved video frame)
-end
-end
 
-rect rgb(215, 255, 255)
+rect rgb(255,250,225)
 alt
 note left of Caller:Playback paused
 rect rgb(193, 225, 255)
@@ -227,4 +227,4 @@ deactivate AV Sync HAL
 ```
 
 ### Data Structures and Defines
-`SoC` vendors should refer to the header files under the 'include' directory for `API` implementation: https://github.com/rdkcentral/avsync-halif/blob/rdk-dev/include/
+`SoC` vendors should refer to the header file present under the 'include' directory for `API` implementation: https://github.com/rdkcentral/avsync-halif/blob/rdk-dev/include/
