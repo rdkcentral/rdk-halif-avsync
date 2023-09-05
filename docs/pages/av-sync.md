@@ -38,7 +38,7 @@
 
 
 ## Description
-This interface is to abstract the `AV Sync` `HAL` requirements at a general level to allow platform independent control. `AV Sync` `HAL` provides details on a set of `API`'s for `SoC` implementation. The picture below shows the interactions between `Caller`, `AV Sync` `HAL` and `SoC` `AV Sync`.
+This interface is to abstract the `AV Sync` `HAL` requirements at a general level to allow platform independent control. `AV Sync` `HAL` provides details on a set of `API`s for `SoC` implementation. The picture below shows the interactions between `Caller`, `AV Sync` `HAL` and `SoC` `AV Sync`.
 
 ```mermaid
 
@@ -60,7 +60,7 @@ style C fill:#fcc,stroke:#333
 - `API`          - Application Programming Interface
 - `Caller`       - Any user of the interface via the APIs
 - `SoC`          - System on Chip
-- `Westeros-GL`  - Westeros Graphics Library
+- `IOCTL`        - Input-Output Control
 
 
 ## Component Runtime Execution Requirements
@@ -70,27 +70,25 @@ These requirements ensure that the `HAL` executes correctly within the run-time 
 `Caller` should initialize the `AV Sync` session by calling `avsync_soc_init`() before calling any other `API`.
 
 ### Threading Model
-This interface is not required to be thread safe. Any `Caller` while invoking these HAL `API`'s should ensure calls are made in a thread safe manner.
+This interface is not required to be thread safe. Any `Caller` while invoking these HAL `API`s should ensure calls are made in a thread safe manner.
 
 ### Process Model
 The interface is expected to support a single instantiation with a single process.
 
 ### Memory Model
-The `AV Sync` `HAL` will own any memory that it creates. The `Caller` will own any memory that it creates.
-
-The `avsync_soc_push_frame`() is responsible to allocate memory for video frames metadata but it should also free this memory if in case sync push frame operation fails.
+The `AV Sync` `HAL` will own any memory that it creates and will also be responsible to free this memory in case of operation failure. The `Caller` will own the memory that it creates.
 
 ### Power Management Requirements
 This interface is not required to be involved in power management.
 
 ### Asynchronous Notification Model
-`avsync_soc_free_frame_callback()` function sets the callback function for freeing any allocated video frames. 
+`avsync_soc_free_frame_callback()` function sets the callback function for freeing any allocated video frames metadata. 
 
 ### Blocking calls
 This interface is required to have no blocking calls.
 
 ### Internal Error Handling
-All the `API`'s must return error synchronously as a return argument. `HAL` is responsible for handling system errors (e.g. out of memory) internally.
+All the `API`s must return error synchronously as a return argument. `HAL` is responsible for handling system errors (e.g. out of memory) internally.
 
 ### Persistence Model
 There is no requirement for the interface to persist any setting information.
@@ -130,25 +128,23 @@ The requirements for `AV Sync` module for `SoC` vendors includes ensuring suppor
 ### Theory of operation and key concepts
 The `Caller` is expected to have complete control over the life cycle of the `HAL`.
 
-- The Westeros module and the `AV Sync` module work together to provide audio and video synchronization for video playback on Linux systems. The Westeros module is responsible for video playback and rendering using the Wayland protocol. It uses the `Westeros-GL` module to perform graphics rendering and the AVSync module to synchronize the audio and video components of a multimedia stream. 
+- `Caller` will be calling the `HAL` `API`s, which are responsible to call the respective `SoC` specific `AV Sync` `API`s, and that is further expected to handle the low-level synchronization related operations using IOCTL calls.
 
-- After the `Westeros-GL` module is initialized, a video server connection is setup through the internal calls. These internal calls will further lead to the start of `AV Sync` module. The Westeros `AV sync` calls will be calling the `HAL` `API`'s, which would be responsible to call the respective `SoC` specific `AV Sync` API's, that would further handle the low-level synchronization related operations using ioctl calls.
-
-- The `HAL` `AV Sync` `API`'s are: 
+- The `HAL` `AV Sync` `API`s are: 
 
 `avsync_soc_init`(), `avsync_soc_term`(), `avsync_soc_set_mode`(), `avsync_soc_free_frame_callback`(), `avsync_soc_push_frame`(), `avsync_soc_pop_frame`(), `avsync_soc_set_rate`(), `avsync_soc_pause`(), `avsync_soc_set_interval`(), `avsync_soc_eos`().
 
-- Initialize the `HAL` using function `avsync_soc_init`() before making any other `API`s calls. If this call fails, the `HAL` must return the respective error. This call initializes the `AV Sync` session and should provide required session related data such as refresh rate, seesion id, sync type, and other optional data like start threshold, vsync interval etc.
+- Initialize the `HAL` using function `avsync_soc_init`() before making any other `API`s calls. If this call fails, the `HAL` must return the respective error. This call initializes the `AV Sync` session and should provide required session related data such as refresh rate, session id, sync type, and other optional data like start threshold, vsync interval etc.
 
-- The `avsync_soc_free_frame_callback`() function sets the callback function for freeing any allocated video frames. 
+- The `avsync_soc_free_frame_callback`() function sets the callback function for freeing any allocated video frames. This `API` is called when the `AV Sync` module has been initialized. The function should set the `freeCB` function for the AVSync object. This ensures that the `freeCB` function will be called when a video frame is no longer needed (as `freeCB` is responsible for freeing the memory that was allocated for the video frame). 
 
-- The push and pop operations on the video frames to `AV Sync` module will be done using `avsync_soc_push_frame`() and `avsync_soc_pop_frame` respectively.
+- The push and pop operations on the video frames to `AV Sync` module will be done using `avsync_soc_push_frame`() and `avsync_soc_pop_frame` respectively. `avsync_soc_push_frame`() `API` is used to push a video frame to the queue of video frames that will be managed by the `SoC` `AV Sync` module. If the vblank interval has been changed, then `Caller` calls the `avsync_soc_set_interval`() `API` to update the vblank interval of the `SoC` `AV Sync` module. `Caller` then calls the `avsync_soc_pop_frame`() function to pop a video frame from the `SoC` `AV Sync` module.
 
-- The sync mode, playback rate and vsync interval can be set using `avsync_soc_set_mode`(), `avsync_soc_set_rate`() and `avsync_soc_set_interval`() respectively.
+- The `avsync_soc_pause`() and `avsync_soc_eos`() should handle the playback conditions 'pause/resume' and 'end-of-stream' respectively. The `API` `avsync_soc_pause`() is expected to pause the `SoC` `AV Sync` module. If the pause argument is true, then the module should be paused and if the pause argument is false, then the module should be resumed. While `avsync_soc_eos`() is expected to signal the end of stream to the `SoC` `AV Sync` module. 
 
-- The `avsync_soc_pause`() and `avsync_soc_eos`() should handle the playback conditions 'pause' and 'end-of-stream' respectively.
+- The sync mode, playback rate and vsync interval can be set using `avsync_soc_set_mode`(), `avsync_soc_set_rate`() and `avsync_soc_set_interval`() respectively. `avsync_soc_set_mode`() is used to set the sync mode that determines how the `SoC` `AV Sync` module synchronizes the audio and video. Possible values can be VMASTER(Video Master), AMASTER(Audio Master), PCR_MASTER(Program Clock Reference Master). `avsync_soc_set_rate`() will be called before `avsync_soc_pause`() to check if the pause argument is false and the rate field is not equal to 1.0.
 
-- The `AV Sync` session will be terminated using `avsync_soc_term`() `API`.
+- The `AV Sync` session will be terminated using `avsync_soc_term`() `API` and should deallocate all of the resources that are used by the `SoC` `AV Sync` module..
 
 ### Diagrams
 
@@ -162,7 +158,6 @@ participant Caller
 participant AV Sync HAL
 participant SoC AV Sync 
 
-Caller-->>Caller:Westeros GL is initialised
 note left of Caller:Playback started
 
 Caller->>+AV Sync HAL:avsync_soc_init()
@@ -186,6 +181,9 @@ Caller->>+AV Sync HAL:avsync_soc_push_frame()
 note over AV Sync HAL,SoC AV Sync:invoke push frame call
 AV Sync HAL->>-Caller:return true
 
+AV Sync HAL--)SoC AV Sync: avsync free frame
+note over AV Sync HAL,SoC AV Sync:free a video frame <br/> that is no longer needed
+
 rect rgb(191, 225, 255)
 alt if vblank interval changes
 Caller->>+AV Sync HAL:avsync_soc_set_interval()
@@ -201,6 +199,7 @@ AV Sync HAL->>-Caller:return f (pointer to the retrieved video frame)
 rect rgb(255,250,225)
 alt
 note left of Caller:Playback paused
+
 rect rgb(193, 225, 255)
 alt  if !pause variable and rate variable != 1.0
 Caller->>+AV Sync HAL:avsync_soc_set_rate()
@@ -215,6 +214,7 @@ end
 end
 
 note left of Caller:Playback EOS
+
 Caller->>+AV Sync HAL:avsync_soc_eos()
 note over AV Sync HAL,SoC AV Sync:invoke eos call
 AV Sync HAL-->>-Caller:return 0

@@ -27,6 +27,11 @@
 
 #define USE_AVSYNC_SOC
 
+/**
+ * @struct AVSyncVideoFrame_
+ * 
+ * @brief This structure is to encapsulate information related to a video frame's metadata.
+*/
 typedef struct AVSyncVideoFrame_
 {
     void*       context;
@@ -38,85 +43,182 @@ typedef struct AVSyncVideoFrame_
 
 } AVSyncVideoFrame;
 
-// Frame delete callback prototype
-typedef void (*AVSyncFrameFree)(AVSyncVideoFrame * frame);
 
 /**
+ * @brief Frame delete callback prototype
+ */
+typedef void (*AVSyncFrameFree)(AVSyncVideoFrame * frame);
+
+
+/**
+ * @brief Initializes AV Sync session.
+ * 
  * This function initializes AV Sync session and returns a pointer to an AVSync object used for audio-video synchronization.
- * The function takes four arguments:
- * 1. refreshRate: The display refresh rate in hertz.
- * 2. syncType: The type of syncronization to use. 
- * 3. sessionId: A pointer to an integer that will be set to the ID of the avsync session.
- * 4. session: A pointer to an integer that will be set to the file descriptor of the avsync session.
+ * The function takes four arguments.
+ * 
+ * @param [in] refreshRate - The display refresh rate in hertz.
+ * @param [in] syncType    - The type of syncronization to use.
+ * 
+ * @param [out] sessionId  - A pointer to an integer that will be set to the ID of the avsync session.
+ * @param [out] session    - A pointer to an integer that will be set to the file descriptor of the avsync session. 
+ * 
+ * @return void* 
+ * @retval handle for avsync module or null for failure.
+ *
 */
 void* avsync_soc_init( int refreshRate, int syncType, int *sessionId, int* session );
 
+
 /**
+ * @brief Terminates AV Sync session.
+ * 
  * This function is used to terminate and clean up resources associated with an AVSync object.
- * The function takes two arguments:
- * sync: A pointer to the AVSync structure that was created by the avsync_soc_init() function.
- * session: The file descriptor of the avsync session.
+ * The function takes two arguments.
+ * 
+ * @param [in] sync    - A pointer to the AVSync structure that was created by the avsync_soc_init() function.
+ * @param [in] session - The file descriptor of the avsync session.
+ * 
+ * @return void 
 */
 void avsync_soc_term( void* sync, int session );
 
+
 /**
+ * @brief Set Mode for AV Sync session.
+ * 
  * This function is used to set the synchronization mode for an AVSync object.
- * The function takes two arguments:
- * sync: A pointer to the AVSync structure that was created by the avsync_soc_init() function.
- * type: The new mode to set. 
+ * Possible modes are VMASTER, AMASTER, PCR_MASTER.
+ * The function takes two arguments. 
+ * 
+ * @param [in] sync - A pointer to the AVSync structure that was created by the avsync_soc_init() function.
+ * @param [in] type - The new mode to set. 
+ * 
+ * @return int - The status of the operation.
+ * @retval 0 if successful, appropiate error code otherwise.
+ * 
 */
 int avsync_soc_set_mode( void* sync, int type );
 
+
 /**
+ * @brief Set the callback to free allocated video frames.
+ * 
  * This function is used to set the frame free callback function for an AVSync object.
- *  The function takes two arguments:
- * sync: A pointer to the AVSync structure that was created by the avsync_soc_init() function.
- * freeCB: A pointer to the AVSyncFrameFree structure.
+ * The function takes two arguments.
+ * 
+ * @param [in] sync   - A pointer to the AVSync structure that was created by the avsync_soc_init() function.
+ * @param [in] freeCB - A pointer to the AVSyncFrameFree structure.
+ * 
+ * @return void
+ * 
+ * @pre avsync_soc_init() must be called before calling this API
+ * 
+ * @see avsync_soc_init()
+ * 
+ * @todo AVSyncFrameFree
+ * 
 */
 void avsync_soc_free_frame_callback( void* sync, AVSyncFrameFree *freeCB );
 
+
 /**
+ * @brief Push a video frame to the AVSync module.
+ * 
  * This function is used to push a video frame to the AVSync module for synchronization.
- * The function takes two arguments:
- * sync: A pointer to the AVSync structure that was created by the avsync_soc_init() function.
- * f: A pointer to the AVSyncVideoFrame structure that contains the frame data.
+ * The function takes two arguments.
+ *
+ * @param [in] sync - A pointer to the AVSync structure that was created by the avsync_soc_init() function.
+ * @param [in] f    - A pointer to the AVSyncVideoFrame structure that contains the frame data.
+ * 
+ * @return bool - The status of the operation.
+ * @retval true if successful, appropiate error code otherwise.
+ * 
+ * @see AVSyncVideoFrame_
+ * 
 */
 bool avsync_soc_push_frame( void* sync, AVSyncVideoFrame *f );
 
+
 /**
+ * @brief Pop a video frame from the AVSync module.
+ * 
  * This function is used to pop/retrieve a video frame from the AVSync module's frame queue.
- * The function takes 'sync' as an argument: A pointer to the AVSync structure that was created by the avsync_soc_init() function.
+ * The function takes one argument.
+ *  
+ * @param [in] sync - A pointer to the AVSync structure that was created by the avsync_soc_init() function.
+ * 
+ * @return - AVSyncVideoFrame*
+ * @retval AVSyncVideoFrame f
+ * 
+ * @see AVSyncVideoFrame_, avsync_soc_set_interval(), avsync_soc_push_frame()
+ * 
 */
 AVSyncVideoFrame* avsync_soc_pop_frame(void* sync );
 
+
 /**
- * This function is used to set the playback rate of an AVSync object.
- * The function takes two arguments:
- * The first argument, sync, is a pointer to the AVSync object. 
- * The second argument, rate, is the playback rate,
+ * @brief Set playback rate for AV Sync session.
+ * 
+ * This function is used to set the playback rate/speed of an AVSync object.
+ * The function takes two arguments.
+ * 
+ * @param [in] sync - A pointer to the AVSync structure that was created by the avsync_soc_init() function.
+ * @param [in] rate - is the playback rate.
+ * 
+ * @return void
+ * @retval 0 if successful, appropiate error code otherwise.
+ * 
 */
 void avsync_soc_set_rate( void* sync, float rate );
 
+
 /**
+ * @brief Pause or resume AV Sync session.
+ * 
  * This function is used to pause or resume playback of an AVSync object.
- * The function takes two arguments:
- * The first argument, sync, is a pointer to the AVSync object. 
- * The second argument, pause, is a boolean value that indicates whether to pause (true) or resume (false) playback.
+ * The function takes two arguments.
+ * 
+ * @param [in] sync  - A pointer to the AVSync structure that was created by the avsync_soc_init() function.
+ * @param [in] pause - a boolean value that indicates whether to pause (true) or resume (false) playback.
+ * 
+ * @return void
+ * @retval 0 if successful, appropiate error code otherwise.
+ * 
+ * @see avsync_soc_set_rate()
+ * 
 */
 void avsync_soc_pause( void* sync, bool pause );
 
+
 /**
+ * @brief Set vsync interval for AV Sync session.
+ * 
  * This function is used to set the interval between vertical synchronization (vsync interval) events for the AVSync module.
- * The function takes two arguments:
- * sync: A pointer to the AVSync structure that was created by the avsync_soc_init() function.
- * interval: interval of type uint32_t, representing the desired interval between vsync events.
+ * The function takes two arguments.
+ * 
+ * @param [in] sync     - A pointer to the AVSync structure that was created by the avsync_soc_init() function.
+ * @param [in] interval - interval of type uint32_t, representing the desired interval between vsync events.
+ * 
+ * @return void
+ * @retval 0 if successful, appropiate error code otherwise.
+ * 
 */
 void avsync_soc_set_interval( void* sync, uint32_t interval );
 
+
 /**
+ * @brief Signal EOS for AV Sync session.
+ * 
  * This function is used to signal the end of stream (EOS) to the AVSync module.
- * The function takes 'sync' as an argument: A pointer to the AVSync structure that was created by the avsync_soc_init() function.
+ * The function takes one argument.
+ * 
+ * @param [in] sync - A pointer to the AVSync structure that was created by the avsync_soc_init() function.
+ * 
+ * @return void
+ * @retval 0 if successful, appropiate error code otherwise.
+ * 
 */
 void avsync_soc_eos( void* sync );
+
 
 #endif
