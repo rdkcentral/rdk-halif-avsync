@@ -13,7 +13,7 @@
   - [Introduction](#introduction)
   - [Acronyms, Terms and Abbreviations](#acronyms-terms-and-abbreviations)
 - [Component Runtime Execution Requirements](#component-runtime-execution-requirements)
-  - [Initialization and Startup](#initializatio-and-startup)
+  - [Initialization and Startup](#initialization-and-startup)
   - [Threading Model](#threading-model)
   - [Process Model](#process-model)
   - [Memory Model](#memory-model)
@@ -33,7 +33,7 @@
 - [Interface API Documentation](#interface-api-documentation)
   - [Theory of operation and key concepts](#theory-of-operation-and-key-concepts)
   - [Diagrams](#diagrams)
-    - [AVSync Code flow](#avsync-code-flow)
+    - [AV Sync Code flow](#av-sync-code-flow)
   - [Data Structures and Defines](#data-structures-and-defines)
 
 
