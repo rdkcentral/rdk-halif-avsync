@@ -127,24 +127,25 @@ The requirements for `AV Sync` module for `SoC` vendor to enable adequate custom
 `API` documentation will be provided by Doxygen which will be generated from the header files.
 
 ### Theory of operation and key concepts
-The `Caller` is expected to have complete control over the life cycle of the `HAL`.
+The `caller` is expected to have complete control over the life cycle of the `HAL`.
 
-- `Caller` will be calling the `HAL` `API`s, which are responsible to call the respective `SoC` specific `AV Sync` `API`s, and that is further expected to handle the low-level synchronization related operations using IOCTL calls.
+- `Caller` will be calling the `HAL` `APIs`, which are responsible to call the respective `SoC` specific `AV Sync` `APIs`, and that is further expected to handle the low-level synchronization related operations using IOCTL calls.
 
-- The `HAL` `AV Sync` `API`s are: 
+- The list of interfaces are: 
 
 `avsync_soc_init`(), `avsync_soc_term`(), `avsync_soc_set_mode`(), `avsync_soc_free_frame_callback`(), `avsync_soc_push_frame`(), `avsync_soc_pop_frame`(), `avsync_soc_set_rate`(), `avsync_soc_pause`(), `avsync_soc_set_interval`(), `avsync_soc_eos`().
 
-- Initialize the `HAL` using function `avsync_soc_init`() before making any other `API` calls. If this call fails, the `HAL` must return the respective error. The `Caller` initializes the `AV Sync` session with refresh rate and sync type to get session id, session.
+- Initialize the `HAL` using function `avsync_soc_init()` before making any other `API` calls. If this call fails, the `HAL` must return the respective error. The `caller` initializes the `AV Sync` session with refresh rate and sync type to get session id, session.
 
 - The function `avsync_soc_free_frame_callback`() registers a callback function responsible for releasing video frame
 and metadata that is no longer required. 
 
-- The push and pop operations on the video frames to `AV Sync` module will be done using `avsync_soc_push_frame`() and `avsync_soc_pop_frame`() respectively. `avsync_soc_push_frame`() API is used to push a video frame to the queue. `avsync_soc_pop_frame`() API is used to pop a video frame. If the vblank interval has been changed, then `avsync_soc_set_interval`() API is used to update the vblank interval of the `SoC` `AV Sync` module.
+- The push and pop operations on the video frames to/from the queue in the `AV Sync` module will be done using `avsync_soc_push_frame()` and `avsync_soc_pop_frame()` respectively.`avsync_soc_set_interval()` is used to update the vblank interval.
 
 - The `avsync_soc_pause`() and `avsync_soc_eos`() should handle the playback conditions 'pause/resume' and 'end-of-stream' respectively. 
 
-- The sync mode, playback rate and vsync interval can be set using `avsync_soc_set_mode`(), `avsync_soc_set_rate`() and `avsync_soc_set_interval`() respectively. `avsync_soc_set_mode`() is used to set the sync mode that determines how the `SoC` `AV Sync` module synchronizes the audio and video. Supported sync types are Video Master, Audio Master and Program Clock Reference Master. `avsync_soc_set_rate`() will be called before `avsync_soc_pause`() to check if the pause argument is false and the rate field is not equal to 1.0.
+- The sync mode, playback rate and vsync interval can be set using `avsync_soc_set_mode()`, `avsync_soc_set_rate()` and `avsync_soc_set_interval()` respectively. `avsync_soc_set_mode()` is used to set the sync mode that determines how the `SoC` synchronizes the audio and video. Supported sync types are Video Master, Audio Master and Program Clock Reference Master. `avsync_soc_set_rate()` will be called before `avsync_soc_pause()` to check if the
+the playback is in normal mode(1x) and is not already paused.
 
 - The `AV Sync` session will be terminated using `avsync_soc_term`() `API` and should deallocate all the resources which are created by the `avsync_soc_init`().
 
