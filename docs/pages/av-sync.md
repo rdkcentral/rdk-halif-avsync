@@ -8,10 +8,9 @@
 
 
 ## Table of Contents
-
+- [Acronyms, Terms and Abbreviations](#acronyms-terms-and-abbreviations)
 - [Description](#description)
   - [Introduction](#introduction)
-  - [Acronyms, Terms and Abbreviations](#acronyms-terms-and-abbreviations)
 - [Component Runtime Execution Requirements](#component-runtime-execution-requirements)
   - [Initialization and Startup](#initialization-and-startup)
   - [Threading Model](#threading-model)
@@ -34,9 +33,16 @@
   - [Theory of operation and key concepts](#theory-of-operation-and-key-concepts)
   - [Diagrams](#diagrams)
     - [AV Sync Code flow](#av-sync-code-flow)
-  - [Data Structures and Defines](#data-structures-and-defines)
 
+## Acronyms, Terms and Abbreviations
 
+- `AV Sync`      - Audio Video Synchronization
+- `HAL`          - Hardware Abstraction Layer
+- `API`          - Application Programming Interface
+- `Caller`       - Any user of the interface via the APIs
+- `SoC`          - System on Chip
+- `IOCTL`        - Input-Output Control
+  
 ## Description
 `AV Sync` `HAL` provides an interface between the `Caller` and `SoC` for audio and video synchronization in real time. The picture below shows the interactions between `Caller`, `AV Sync` `HAL` and `SoC` `AV Sync`.
 
@@ -52,16 +58,6 @@ style C fill:#fcc,stroke:#333
 
 ### Introduction
 `AV Sync` module is a software component that enables synchronization between audio and video frames in real-time media applications. This module is particularly important in media playback scenarios where the audio and video streams faces synchronization issues.
-
-### Acronyms, Terms and Abbreviations
-
-- `AV Sync`      - Audio Video Synchronization
-- `HAL`          - Hardware Abstraction Layer
-- `API`          - Application Programming Interface
-- `Caller`       - Any user of the interface via the APIs
-- `SoC`          - System on Chip
-- `IOCTL`        - Input-Output Control
-
 
 ## Component Runtime Execution Requirements
 These requirements ensure that the `HAL` executes correctly within the run-time environment that it will be used in. Failure to meet these requirements will likely result in undefined and unexpected behaviour.
@@ -225,6 +221,3 @@ deactivate SoC AV Sync
 deactivate AV Sync HAL
 
 ```
-
-### Data Structures and Defines
-`SoC` vendors should refer to the header file present under the 'include' directory for `API` implementation: https://github.com/rdkcentral/avsync-halif/blob/rdk-dev/include/
