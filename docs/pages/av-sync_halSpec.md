@@ -63,10 +63,10 @@ style C fill:#fcc,stroke:#333
 These requirements ensure that the `HAL` executes correctly within the run-time environment that it will be used in. Failure to meet these requirements will likely result in undefined and unexpected behaviour.
 
 ### Initialization and Startup
-`Caller` should initialize the `AV Sync` session by calling `avsync_soc_init`() before calling any other `API`.
+`Caller` should initialize the `AV Sync` session by calling `avsync_soc_init()` before calling any other `API`.
 
 ### Threading Model
-This interface is not required to be thread safe. Any `Caller` while invoking these HAL `API`s should ensure calls are made in a thread safe manner.
+This interface is not required to be thread safe. Any `Caller` while invoking these HAL `APIs` should ensure calls are made in a thread safe manner.
 
 ### Process Model
 The interface is expected to support a single instantiation with a single process.
@@ -84,7 +84,7 @@ This interface is not required to be involved in power management.
 This interface is required to have no blocking calls.
 
 ### Internal Error Handling
-All the `API`s must return error synchronously as a return argument. `HAL` is responsible for handling system errors (e.g. out of memory) internally.
+All the `APIs` must return error synchronously as a return argument. `HAL` is responsible for handling system errors (e.g. out of memory) internally.
 
 ### Persistence Model
 There is no requirement for the interface to persist any setting information.
@@ -129,21 +129,21 @@ The `caller` is expected to have complete control over the life cycle of the `HA
 
 - The list of interfaces are: 
 
-`avsync_soc_init`(), `avsync_soc_term`(), `avsync_soc_set_mode`(), `avsync_soc_free_frame_callback`(), `avsync_soc_push_frame`(), `avsync_soc_pop_frame`(), `avsync_soc_set_rate`(), `avsync_soc_pause`(), `avsync_soc_set_interval`(), `avsync_soc_eos`().
+`avsync_soc_init()`, `avsync_soc_term()`, `avsync_soc_set_mode()`, `avsync_soc_free_frame_callback()`, `avsync_soc_push_frame()`, `avsync_soc_pop_frame()`, `avsync_soc_set_rate()`, `avsync_soc_pause()`, `avsync_soc_set_interval()`, `avsync_soc_eos()`.
 
 - Initialize the `HAL` using function `avsync_soc_init()` before making any other `API` calls. If this call fails, the `HAL` must return the respective error. The `caller` initializes the `AV Sync` session with refresh rate and sync type to get session id, session.
 
-- The function `avsync_soc_free_frame_callback`() registers a callback function responsible for releasing video frame
+- The function `avsync_soc_free_frame_callback()` registers a callback function responsible for releasing video frame
 and metadata that is no longer required. 
 
 - The push and pop operations on the video frames to/from the queue in the `AV Sync` module will be done using `avsync_soc_push_frame()` and `avsync_soc_pop_frame()` respectively.`avsync_soc_set_interval()` is used to update the vblank interval.
 
-- The `avsync_soc_pause`() and `avsync_soc_eos`() should handle the playback conditions 'pause/resume' and 'end-of-stream' respectively. 
+- The `avsync_soc_pause()` and `avsync_soc_eos()` should handle the playback conditions 'pause/resume' and 'end-of-stream' respectively. 
 
 - The sync mode, playback rate and vsync interval can be set using `avsync_soc_set_mode()`, `avsync_soc_set_rate()` and `avsync_soc_set_interval()` respectively. `avsync_soc_set_mode()` is used to set the sync mode that determines how the `SoC` synchronizes the audio and video. Supported sync types are Video Master, Audio Master and Program Clock Reference Master. `avsync_soc_set_rate()` will be called before `avsync_soc_pause()` to check if the
 the playback is in normal mode(1x) and is not already paused.
 
-- The `AV Sync` session will be terminated using `avsync_soc_term`() `API` and should deallocate all the resources which are created by the `avsync_soc_init`().
+- The `AV Sync` session will be terminated using `avsync_soc_term()` `API` and should deallocate all the resources which are created by the `avsync_soc_init()`.
 
 ### Diagrams
 
@@ -164,7 +164,7 @@ note over AV Sync HAL,SoC AV Sync:invoke open/create session calls
 AV Sync HAL-->>SoC AV Sync:session opened
 activate SoC AV Sync 
 SoC AV Sync-->>AV Sync HAL:return session related data
-AV Sync HAL-->>-Caller:returns pointer to the AVSync structure
+AV Sync HAL-->>-Caller:returns pointer to the AV Sync handle
 
 rect rgb(191, 225, 255)
 alt Set the callback to free the allocated video frame and metadata
@@ -180,8 +180,9 @@ Caller->>+AV Sync HAL:avsync_soc_push_frame()
 note over AV Sync HAL,SoC AV Sync:invoke push frame call
 AV Sync HAL->>-Caller:return true
 
+Caller--)AV Sync HAL: trigger for avsync_soc_free_frame_callback()
 AV Sync HAL--)SoC AV Sync: avsync free frame
-note over AV Sync HAL,SoC AV Sync:free a video frame <br/> that is no longer needed
+note over AV Sync HAL,SoC AV Sync: free a video frame <br/> that is no longer needed
 
 rect rgb(191, 225, 255)
 alt if vblank interval changes
