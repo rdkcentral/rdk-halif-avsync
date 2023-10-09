@@ -58,7 +58,7 @@
  */
 
 #ifndef __AVSYNC_H__
-#define __AVSYNC_SOC_H__
+#define __AVSYNC_H__
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -203,7 +203,8 @@ bool avsync_soc_push_frame( void* sync, AVSyncVideoFrame *f );
  * avsync_soc_init() function.
  * 
  * @return - AVSyncVideoFrame*
- * @retval AVSyncVideoFrame f
+ * @retval A pointer to the AVSyncVideoFrame structure that contains
+ * the frame metadata. Valid value: any non-zero value.  
  * 
  * @see AVSyncVideoFrame_, avsync_soc_set_interval(), avsync_soc_push_frame()
  * 
@@ -287,4 +288,7 @@ void avsync_soc_set_interval( void* sync, uint32_t interval );
 void avsync_soc_eos( void* sync );
 
 
-#endif // End of __AVSYNC_SOC_H__
+#endif // End of __AVSYNC_H__
+
+/** @} */ // End of RDK_HAL_AVSYNC
+/** @} */ // End of HPK
