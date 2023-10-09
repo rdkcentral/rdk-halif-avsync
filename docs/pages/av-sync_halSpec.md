@@ -180,7 +180,7 @@ Caller->>+AV Sync HAL:avsync_soc_push_frame()
 note over AV Sync HAL,SoC AV Sync:invoke push frame call
 AV Sync HAL->>-Caller:return true
 
-AV Sync HAL--)AV Sync HAL: trigger for avsync_soc_free_frame_callback()
+SoC AV Sync--)SoC AV Sync: avsync_soc_free_frame_callback() trigger
 AV Sync HAL--)SoC AV Sync: avsync free frame
 note over AV Sync HAL,SoC AV Sync: free a video frame <br/> that is no longer needed
 
