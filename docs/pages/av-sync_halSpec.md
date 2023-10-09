@@ -204,10 +204,13 @@ rect rgb(193, 225, 255)
 alt  if !pause variable and rate variable != 1.0
 Caller->>+AV Sync HAL:avsync_soc_set_rate()
 note over AV Sync HAL,SoC AV Sync:set playback rate/speed
+deactivate AV Sync HAL
 end
 end
+
 Caller->>+AV Sync HAL:avsync_soc_pause()
 note over AV Sync HAL,SoC AV Sync:invoke pause call
+deactivate AV Sync HAL
 end
 end
 
@@ -215,6 +218,8 @@ note left of Caller:Playback EOS
 
 Caller->>+AV Sync HAL:avsync_soc_eos()
 note over AV Sync HAL,SoC AV Sync:invoke eos call
+deactivate AV Sync HAL
+
 Caller->>+AV Sync HAL:avsync_soc_term()
 note over AV Sync HAL,SoC AV Sync:invoke close/destroy session calls
 AV Sync HAL--xSoC AV Sync:session closed
