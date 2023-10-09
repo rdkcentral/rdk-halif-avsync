@@ -180,9 +180,10 @@ Caller->>+AV Sync HAL:avsync_soc_push_frame()
 note over AV Sync HAL,SoC AV Sync:invoke push frame call
 AV Sync HAL->>-Caller:return true
 
-SoC AV Sync--)SoC AV Sync: avsync_soc_free_frame_callback() trigger
-AV Sync HAL--)SoC AV Sync: avsync free frame
-note over AV Sync HAL,SoC AV Sync: free a video frame <br/> that is no longer needed
+SoC AV Sync--)SoC AV Sync: trigger free frame callback when the frame is no longer required 
+SoC AV Sync-->>AV Sync HAL: avsync free frame callback
+AV Sync HAL-->>Caller: avsync free frame callback
+note over Caller,SoC AV Sync: free a video frame that is no longer needed
 
 rect rgb(191, 225, 255)
 alt if vblank interval changes
