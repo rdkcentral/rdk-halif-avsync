@@ -17,30 +17,68 @@
  * limitations under the License.
  */
 
-#ifndef __WESTEROS_GL_AVSYNC_H__
-#define __WESTEROS_GL_AVSYNC_SOC_H__
+/**
+ * @addtogroup HPK Hardware Porting Kit
+ * @{
+ * @par The Hardware Porting Kit
+ * HPK is the next evolution of the well-defined Hardware Abstraction Layer
+ * (HAL), but augmented with more comprehensive documentation and test suites
+ * that OEM or SOC vendors can use to self-certify their ports before taking
+ * them to RDKM for validation or to an operator for final integration and
+ * deployment. The Hardware Porting Kit effectively enables an OEM and/or SOC
+ * vendor to self-certify their own Video Accelerator devices, with minimal RDKM
+ * assistance.
+ *
+ */
+
+/**
+ * @defgroup RDK_HAL_AVSYNC RDK HAL AVSync
+ * @{
+ * @par Application API Specification
+ * AVSync module provides functionalities for audio/video synchronization
+ * during playback, ensuring proper alignment and timing between the streams.
+ * Provides API defines the structures and functions for the RDK HAL AVSync.
+ *
+ */
+
+/**
+ * @file avsync-soc.h
+ *
+ * @brief RDK HAL AVSync Public API
+ *
+ * This file defines the structures and functions for the RDK HAL AVSync
+ *
+ * @par Abbreviations
+ * - HAL:       Hardware Abstraction Layer
+ * - AV Sync:   Audio Video Synchronization
+ * - API:       Application Programming Interface
+ * - SoC:       System on Chip
+ * - pts:       Presentation timestamp
+ *
+ */
+
+#ifndef __AVSYNC_H__
+#define __AVSYNC_SOC_H__
 
 #include <stdint.h>
 #include <stdbool.h>
-
-#define WESTEROS_GL_AVSYNC
-
-#define USE_AVSYNC_SOC
 
 /**
  * @struct AVSyncVideoFrame_
  * 
  * @brief This structure is to encapsulate information related to a video
  * frame's metadata.
-*/
+ */
 typedef struct AVSyncVideoFrame_
 {
-    void*       context;
-    void*       sync;
-    void*       videoFrame;
-    void*       syncFrame;
-    uint32_t    pts;
-    uint32_t    duration;
+    void*       context;     ///< Pointer to additional context data associated
+                             ///  with the video frame's metadata.
+    void*       sync;        ///< Pointer to synchronization data or object 
+                             ///  associated with the video frame's metadata.
+    void*       videoFrame;  ///< Pointer to the video frame's metadata.
+    void*       syncFrame;   ///< Pointer to synchronization frame.
+    uint32_t    pts;         ///< Presentation timestamp of the video frame.
+    uint32_t    duration;    ///< Duration of the video frame.
 
 } AVSyncVideoFrame;
 
@@ -57,8 +95,10 @@ typedef void (*AVSyncFrameFree)(AVSyncVideoFrame * frame);
  * This function initializes AV Sync session and returns a pointer to an AVSync
  * object used for audio-video synchronization.
  * 
- * @param [in] refreshRate - The display refresh rate in hertz.
- * @param [in] syncType    - The type of syncronization to use.
+ * @param [in] refreshRate - The display refresh rate in hertz. 
+ *                           Valid range: 1Hz to 1000Hz
+ * @param [in] syncType    - The type of syncronization to use. 
+ *                           Valid range: 0 to maximum number of syncType. 
  * 
  * @param [out] sessionId  - A pointer to an integer that will be set to the ID
  * of the avsync session.
@@ -68,7 +108,7 @@ typedef void (*AVSyncFrameFree)(AVSyncVideoFrame * frame);
  * @return void* 
  * @retval handle for avsync module or null for failure.
  *
-*/
+ */
 void* avsync_soc_init( int refreshRate, int syncType, int *sessionId, int* session );
 
 
@@ -81,9 +121,12 @@ void* avsync_soc_init( int refreshRate, int syncType, int *sessionId, int* sessi
  * @param [in] sync    - A pointer to the AVSync structure that was created by
  * the avsync_soc_init() function.
  * @param [in] session - The file descriptor of the avsync session.
+ *
+ * @return void
+ *
+ * @pre avsync_soc_init() must be called before calling this API
  * 
- * @return void 
-*/
+ */
 void avsync_soc_term( void* sync, int session );
 
 
@@ -99,9 +142,11 @@ void avsync_soc_term( void* sync, int session );
  * @param [in] type - The new mode to set. Possible values are: 0, 1, 2.
  * 
  * @return int - The status of the operation.
- * @retval 0 if successful, appropiate error code otherwise.
+ * @retval 0 if successful, -1 otherwise.
+ *
+ * @pre avsync_soc_init() must be called before calling this API
  * 
-*/
+ */
 int avsync_soc_set_mode( void* sync, int type );
 
 
@@ -122,9 +167,7 @@ int avsync_soc_set_mode( void* sync, int type );
  * 
  * @see avsync_soc_init()
  * 
- * @todo AVSyncFrameFree
- * 
-*/
+ */
 void avsync_soc_free_frame_callback( void* sync, AVSyncFrameFree *freeCB );
 
 
@@ -137,14 +180,16 @@ void avsync_soc_free_frame_callback( void* sync, AVSyncFrameFree *freeCB );
  * @param [in] sync - A pointer to the AVSync structure that was created by the
  * avsync_soc_init() function.
  * @param [in] f    - A pointer to the AVSyncVideoFrame structure that contains
- * the frame data.
+ * the frame metadata. Valid value: any non-zero value.
  * 
  * @return bool - The status of the operation.
  * @retval true if successful, false otherwise.
  * 
  * @see AVSyncVideoFrame_
  * 
-*/
+ * @pre avsync_soc_init() must be called before calling this API
+ *
+ */
 bool avsync_soc_push_frame( void* sync, AVSyncVideoFrame *f );
 
 
@@ -162,7 +207,10 @@ bool avsync_soc_push_frame( void* sync, AVSyncVideoFrame *f );
  * 
  * @see AVSyncVideoFrame_, avsync_soc_set_interval(), avsync_soc_push_frame()
  * 
-*/
+ * @pre avsync_soc_init() must be called before calling this API
+ * @pre avsync_soc_push_frame() must be called before calling this API
+ * 
+ */
 AVSyncVideoFrame* avsync_soc_pop_frame(void* sync );
 
 
@@ -173,11 +221,13 @@ AVSyncVideoFrame* avsync_soc_pop_frame(void* sync );
  * 
  * @param [in] sync - A pointer to the AVSync structure that was created by the
  * avsync_soc_init() function.
- * @param [in] rate - is the playback rate.
+ * @param [in] rate - is the playback rate. Valid range: 0.0 to 256.0
  * 
  * @return void
  * 
-*/
+ * @pre avsync_soc_init() must be called before calling this API
+ *
+ */
 void avsync_soc_set_rate( void* sync, float rate );
 
 
@@ -192,10 +242,13 @@ void avsync_soc_set_rate( void* sync, float rate );
  * or resume (false) playback.
  * 
  * @return void
- * 
+ *
+ * @pre avsync_soc_init() must be called before calling this API
+ * @pre avsync_soc_set_rate() must be called before calling this API
+ *
  * @see avsync_soc_set_rate()
  * 
-*/
+ */
 void avsync_soc_pause( void* sync, bool pause );
 
 
@@ -208,11 +261,13 @@ void avsync_soc_pause( void* sync, bool pause );
  * @param [in] sync     - A pointer to the AVSync structure that was created by
  * the avsync_soc_init() function.
  * @param [in] interval - interval of type uint32_t, representing the desired
- * interval between vsync events.
+ * interval between vsync events. Valid range: 1-1000 milliseconds.
  * 
  * @return void
  * 
-*/
+ * @pre avsync_soc_init() must be called before calling this API
+ *
+ */
 void avsync_soc_set_interval( void* sync, uint32_t interval );
 
 
@@ -226,8 +281,10 @@ void avsync_soc_set_interval( void* sync, uint32_t interval );
  * 
  * @return void
  * 
-*/
+ * @pre avsync_soc_init() must be called before calling this API
+ *
+ */
 void avsync_soc_eos( void* sync );
 
 
-#endif
+#endif // End of __AVSYNC_SOC_H__
